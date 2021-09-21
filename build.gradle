@@ -1,0 +1,63 @@
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.3"
+    }
+}
+
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'org.sonarqube' version "3.3"
+}
+
+group 'com.ashwin'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+        csv.enabled = false
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectName", "Java SonarQube Test"
+        property "sonar.projectKey", "com.ashwin.sonarqube"
+        property "sonar.host.url", "http://localhost:9000"
+        property "sonar.language", "java"
+        property "sonar.sources", "src/main/"
+        property "sonar.login", "admin"
+        property "sonar.password", "pass123"
+
+        // Coverage config
+        def unitTestCoverageExclusions = [
+                '**/R.class',
+                '**/R$*.class',
+                '**/BuildConfig.*',
+                '**/Manifest*.*'
+        ]
+        property "sonar.junit.reportsPath", "build/test-results/testDebugUnitTest"
+        property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.coverage.jacoco.xmlReportPaths", "**/jacoco/test/jacocoTestReport.xml"
+        property "sonar.coverage.exclusions", "${unitTestCoverageExclusions.join(', ')}"
+    }
+}
